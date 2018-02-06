@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/amidvidy/wtgo"
+	"github.com/m-masataka/wtgo"
 )
 
 func main() {

@@ -6,13 +6,19 @@ package wtgo
  #include <stdlib.h>
 
 void wt_cursor_set_key(WT_CURSOR* cursor,
-                       WT_ITEM* item) {
-    return cursor->set_key(cursor, item);
+                       size_t size, void *p) {
+    WT_ITEM item;
+    item.data = p;
+    item.size = size;
+    return cursor->set_key(cursor, &item);
 }
 
 void wt_cursor_set_value(WT_CURSOR* cursor,
-                         WT_ITEM* item) {
-    return cursor->set_value(cursor, item);
+                       size_t size, void *p) {
+    WT_ITEM item;
+    item.data = p;
+    item.size = size;
+    return cursor->set_value(cursor, &item);
 }
 
 int wt_cursor_get_key(WT_CURSOR* cursor,
@@ -53,27 +59,28 @@ type Cursor struct {
 
 func (cur *Cursor) SetKey(key []byte) {
 	//var C.WT_ITEM
-	wtkey := unsafe.Pointer(&key[0])
 	keylen := C.size_t(len(key))
 
-	item := C.WT_ITEM{}
+	var p *byte
+	if len(key) > 0 {
+		p = &key[0]
+	}
 
-	item.data = wtkey
-	item.size = keylen
+	wtkey := unsafe.Pointer(p)
 
-	C.wt_cursor_set_key(cur.WTCursor, &item)
+	C.wt_cursor_set_key(cur.WTCursor, keylen, wtkey)
 }
 
 func (cur *Cursor) SetValue(value []byte) {
-	wtval := unsafe.Pointer(&value[0])
 	vallen := C.size_t(len(value))
 
-	item := C.WT_ITEM{}
+	var p *byte
+	if len(value) > 0 {
+		p = &value[0]
+	}
+	wtval := unsafe.Pointer(p)
 
-	item.data = wtval
-	item.size = vallen
-
-	C.wt_cursor_set_value(cur.WTCursor, &item)
+	C.wt_cursor_set_value(cur.WTCursor, vallen, wtval)
 }
 
 func (cur *Cursor) GetKey() ([]byte, error) {
